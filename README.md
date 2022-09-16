@@ -29,6 +29,7 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`mycli download [URL]`](#mycli-download-url)
 * [`mycli hello PERSON`](#mycli-hello-person)
 * [`mycli hello world`](#mycli-hello-world)
 * [`mycli help [COMMAND]`](#mycli-help-command)
@@ -41,6 +42,29 @@ USAGE
 * [`mycli plugins:uninstall PLUGIN...`](#mycli-pluginsuninstall-plugin-1)
 * [`mycli plugins:uninstall PLUGIN...`](#mycli-pluginsuninstall-plugin-2)
 * [`mycli plugins update`](#mycli-plugins-update)
+
+## `mycli download [URL]`
+
+download specify hls file
+
+```
+USAGE
+  $ mycli download [URL] [-p <value>]
+
+ARGUMENTS
+  URL  URL to download
+
+FLAGS
+  -p, --path=<value>  path to storage
+
+DESCRIPTION
+  download specify hls file
+
+EXAMPLES
+  $ mycli download https://example.com/test.m3u8 -p [your path] -n [rename file]
+```
+
+_See code: [dist/commands/download.ts](https://github.com/cli/hello-world/blob/v0.0.0/dist/commands/download.ts)_
 
 ## `mycli hello PERSON`
 
@@ -100,7 +124,7 @@ DESCRIPTION
   Display help for mycli.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.10/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
 ## `mycli plugins`
 
@@ -120,7 +144,7 @@ EXAMPLES
   $ mycli plugins
 ```
 
-_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.0.11/src/commands/plugins/index.ts)_
+_See code: [@oclif/plugin-plugins](https://github.com/oclif/plugin-plugins/blob/v2.1.0/src/commands/plugins/index.ts)_
 
 ## `mycli plugins:install PLUGIN...`
 

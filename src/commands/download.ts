@@ -1,17 +1,18 @@
-import {Command, Flags} from '@oclif/core'
-import * as http from 'node:http'
+import {Command, Config, Flags} from '@oclif/core'
 import * as fs from 'node:fs/promises'
 import * as CliProgress from 'cli-progress'
 import Utils from '../utils'
 import path = require('node:path')
-import * as inquirer from 'inquirer'
+// import * as inquirer from 'inquirer'
 import fetch, {RequestInit} from 'node-fetch'
 
+const inquirer = require('inquirer')
 /**
  * TODO: 区分普通下载与 hls 下载时路径不不同
  * TODO: 下载进度显示
  * TODO: 下载过程信息展示
  */
+
 export default class Download extends Command {
   static description = 'download specify hls file';
 
@@ -23,11 +24,11 @@ export default class Download extends Command {
     // name: Flags.string({char: 'n', description: 'name of file to rename', required: true}),
   };
 
-  static args = [{name: 'url', description: 'URL to download'}];
+  static args = [{name: 'url', description: 'URL to download', require: true}];
 
   private m3u8Regex = /\.m3u8/i
   private storagePath = Utils.getDefaultStoragePath()
-  private bar = null
+  private bar = new CliProgress.SingleBar({}, CliProgress.Presets.shades_classic)
   private defaultOptions: RequestInit = {}
 
   private async m3u8Download(url: string) {
@@ -67,12 +68,14 @@ export default class Download extends Command {
       const urls = []
       for (const line of lines) {
         if (line.indexOf('#EXT-X-STREAM-INF') > 0) {
+          console.log(line)
           resolutions.push(line.match(/resolution=\d*x\d*/i)![0])
         } else if (line.indexOf('.m3u8')) {
           urls.push(path.resolve(prefix, line))
         }
       }
 
+      console.log('resolutions', resolutions)
       const prompt = inquirer.createPromptModule()
       const result = await prompt({
         type: 'rawlist',
@@ -90,29 +93,35 @@ export default class Download extends Command {
         }
       }
 
-      Promise.all(tasks)
+      await Promise.all(tasks)
+      this.log('download finished')
     }
   }
 
   private async normalDownload(dir: string, url: string) {
-    const name = url.split('/').pop()?.split('.')[0] || 'name'
-    http.get(url, this.defaultHeader, res => {
-      const {statusCode}  = res
-      if (statusCode !== 200) {
-        res.resume()
-        this.error(`download [${url}] error: statusCode: ${statusCode}`)
-      }
+    const [floder] = url.split('/')
+    const res = await fetch(url, this.defaultOptions)
+    await fs.mkdir(path.resolve(dir, floder))
+    const handle = await fs.open(path.resolve(dir, url), 'w')
+    const writer = handle.createWriteStream()
+    res.body?.pipe(writer)
+    // http.get(url, this.defaultHeader, res => {
+    //   const {statusCode}  = res
+    //   if (statusCode !== 200) {
+    //     res.resume()
+    //     this.error(`download [${url}] error: statusCode: ${statusCode}`)
+    //   }
 
-      const wStream = fs.createWriteStream(path.resolve(dir, name))
+    //   const wStream = fs.createWriteStream(path.resolve(dir, name))
 
-      res.on('data', chunk => {
-        wStream.write(chunk)
-      })
+    //   res.on('data', chunk => {
+    //     wStream.write(chunk)
+    //   })
 
-      res.on('end', () => {
-        wStream.close()
-      })
-    })
+    //   res.on('end', () => {
+    //     wStream.close()
+    //   })
+    // })
   }
 
   public async run(): Promise<void> {
@@ -131,8 +140,6 @@ export default class Download extends Command {
     if (!args.url) {
       this.error('you must specify a url to download')
     }
-
-    this.bar = new CliProgress.SingleBar({}, CliProgress.Presets.shades_classic)
 
     if (this.m3u8Regex.test(args.url)) {
       this.m3u8Download(args.url)
