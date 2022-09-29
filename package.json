@@ -1,5 +1,5 @@
 {
-  "name": "mycli",
+  "name": "mtools",
   "version": "0.0.0",
   "description": "oclif example Hello World CLI",
   "author": "rongyun.gong",
@@ -45,8 +45,8 @@
     "typescript": "^4.4.3"
   },
   "oclif": {
-    "bin": "mycli",
-    "dirname": "mycli",
+    "bin": "mtools",
+    "dirname": "mtools",
     "commands": "./dist/commands",
     "plugins": [
       "@oclif/plugin-help",
